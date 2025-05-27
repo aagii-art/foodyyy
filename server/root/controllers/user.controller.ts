@@ -22,10 +22,11 @@ export const createUser = async ( req : Request, res : Response ) => {
     }
 
     const hashedPassword = await bcrypt.hash( password, 10 );
-    const newUser = new User({ name, email, password : hashedPassword, verifyToken, isVerified : false });
+    const newUser = new User({   role: "user" , name, email, password : hashedPassword, verifyToken, isVerified : false });
     await newUser.save();
 
     const verificationLink = `http://localhost:3000/api/users/verify-email?token=${verifyToken}`;
+
     const transporter = nodemailer.createTransport({
           service: "gmail",
           auth: {
@@ -37,12 +38,12 @@ export const createUser = async ( req : Request, res : Response ) => {
               from: process.env.EMAIL_USER,
               to: email,
               subject: "Verify your email",
-              html: `<p> click below link to verify your email :) </p> <a href="${verificationLink}">${verificationLink}</a>`,
+              html: `<p> click below link to verify your email :) </p> <a href="${verificationLink}"> verify email </a>`,
     };
 
     await transporter.sendMail(mailOptions);
-    res.status(201).send("user created. Check gmail to verify your email ");
-   } catch (error) {
+    res.status(201).json({ message: "User created. Check Gmail to verify your email." }); 
+    } catch (error) {
          res.status(500).json({ message: "Server error shuu ", error });
    }
 }
@@ -51,31 +52,32 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      res.status(400).json({ message: "Email and password are required" });
+      res.status(400).json({ msg : "Email and password are required" });
       return;
     }
 
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
-      res.status(401).json({ message: "Invalid email" });
+      res.status(401).json({ msg : "Invalid email" });
       return;
     }
     if (!existingUser.isVerified) {
-       res.status(401).json({ message: "Please verify your email before logging in" });
+       res.status(401).json({ msg : "Please verify your email before logging in" });
        return;
     }
 
     const checkPassword = await bcrypt.compare( password, existingUser.password );
-    if( !checkPassword ){ res.send("invalid password"); return; }
+    if( !checkPassword ){ res.json({ msg : "invalid password"}); return; }
     
     const token = jwt.sign(
       { id : existingUser._id },
-      process.env.JWT_KEY as string,
+       process.env.jwtt as string ,
       { expiresIn : "1h" }
     );
 
-    res.status(200).json({ message: "Login successful", user : existingUser, "login-token": token });
+    res.status(200).json({ msg : "Login successful", token });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    res.status(500).json({ msg : "Server error", error });
   }
 };
+

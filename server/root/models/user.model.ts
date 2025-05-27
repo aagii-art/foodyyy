@@ -8,6 +8,7 @@ interface typeUser extends Document {
   resetPasswordExpires?: number;
   verifyToken? :  string;
   isVerified : boolean;
+  role: "user" | "admin";
 }
 
 const UserSchema = new Schema<typeUser>(
@@ -19,6 +20,7 @@ const UserSchema = new Schema<typeUser>(
         resetPasswordExpires : { type : Number },
         verifyToken: { type: String },
         isVerified: { type: Boolean, default: false },
+        role  : { type : String, enum : [ "user", "admin" ], default  : "user"  }
     },
     { timestamps  : true }
 );
