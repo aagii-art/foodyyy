@@ -1,14 +1,30 @@
 import { Request, Response } from "express";
 import Food from "../models/food.model";
 
-export const getAllFoods = async (req: Request, res: Response) => {
+
+export const getCategories = async (req: Request, res: Response) => {
   try {
-    const foods = await Food.find();
-    res.status(200).json(foods);
-  } catch (error) {
-    res.status(500).json({ message: `Server error: ${error}` });
+    const categories = await Food.distinct("category");
+    res.json({ categories });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch categories" });
   }
 };
+
+export const getFoodsByCategory = async (req: Request, res: Response) => {
+  try {
+    const category = req.query.category as string;
+    if (!category) {
+     res.status(400).json({ error: "Category is required" }); return ;
+    }
+
+    const foods = await Food.find({ category });
+    res.json({ foods });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch foods" });
+  }
+};
+
 
 export const createFood = async (req: Request, res: Response) => {
     try {

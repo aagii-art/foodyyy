@@ -70,7 +70,7 @@ export const loginUser = async (req: Request, res: Response) => {
     if( !checkPassword ){ res.json({ msg : "invalid password"}); return; }
     
     const token = jwt.sign(
-      { id : existingUser._id },
+      { id : existingUser._id, role : existingUser.role },
        process.env.jwtt as string ,
       { expiresIn : "1h" }
     );

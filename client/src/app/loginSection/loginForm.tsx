@@ -5,6 +5,11 @@ import { useState } from "react";
 import * as Yup from "yup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+
+interface TokenType {
+  role: "admin" | "user";
+}
 
 export default function LoginForm () {
       const [message, setMessage] = useState("");
@@ -19,8 +24,14 @@ export default function LoginForm () {
                                setMessage(res.data.msg);
                                const token = res.data.token;
                                localStorage.setItem("token", token);
+                               const decoded = jwtDecode<TokenType>(token);
+                                if (decoded.role === "admin") {
+                                   router.push("/admin-dashboard");
+                                } else {
+                                       router.push("/");
+                                }
+
                                if(token){ resetForm() }
-                               setTimeout(() => { if( token ) { router.push("/") } }, 1000);
                         } catch (error) {
                                 if (axios.isAxiosError(error)) {
                                    setMessage(error.response?.data?.msg);

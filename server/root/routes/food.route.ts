@@ -1,9 +1,10 @@
 import express from "express";
-import { createFood, getAllFoods } from "../controllers/food.controller";
+import { createFood, getCategories, getFoodsByCategory } from "../controllers/food.controller";
 
 const foodRouter = express.Router();
 
-foodRouter.get("/", getAllFoods);
+foodRouter.get("/categories", getCategories);
+foodRouter.get("/", getFoodsByCategory);
 foodRouter.post( "/", createFood );
 
 export default foodRouter;
