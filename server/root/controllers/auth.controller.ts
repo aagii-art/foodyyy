@@ -19,7 +19,7 @@ import  jwt  from "jsonwebtoken";
     user.verifyToken = undefined;
     await user.save();
 
-    res.redirect("http://localhost:3001/emailVerified");
+    res.redirect("http://localhost:3001/loginSection/emailVerified");
   } catch (error) {
     res.status(500).send("Server error during email verification");
   }
@@ -29,7 +29,7 @@ export const verifyToken = async ( req : Request, res : Response ) => {
 
    try {
       const irjigaHeader = req.headers.authorization;
-      console.log(irjigaHeader);
+      console.log( " irjiga header : ", irjigaHeader);
       
       if( !irjigaHeader || !irjigaHeader.startsWith("Bearer ") ){
        res.status(401).json({ valid : false, msg: "Token not provided" }); return;
@@ -37,7 +37,7 @@ export const verifyToken = async ( req : Request, res : Response ) => {
       const token = irjigaHeader.split(" ")[1];
       
       const decoded = jwt.verify(token, process.env.jwtt as string ) as { id : string;  } ;
-      console.log( " this is decoded : ",  decoded );
+      console.log( " this is decoded token : ",  decoded );
       
       const existingUser = await User.findById(decoded.id);
       if (!existingUser) {

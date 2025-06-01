@@ -1,27 +1,32 @@
 "use client"
-import { jwtDecode } from "jwt-decode";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import FoodMenu from "./food-menu";
+import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+
 interface TokenType {
     role  : string
 }
 
 export default function Admin () {
-const [decoded, setDecoded] = useState<TokenType | null>(null);
-const searchParams = useSearchParams();
-const foodMenuActive = searchParams.get("food-menu") === "ok";
-const ordersActive = searchParams.get("orders") === "ok";
+
+  const searchParams = useSearchParams();
+  const ordersActive = searchParams.get("orders") === "ok";
+  const foodMenuActive = searchParams.get("food-menu") === "ok";
+  const [decoded, setDecoded] = useState<TokenType | null>(null);
 
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwtDecode<TokenType>(token);
+      console.log(" decoded token : ", decodedToken);
+      
       setDecoded(decodedToken);
     }
   }, []);
+  
   if (!decoded || decoded.role !== "admin") {
     return <p>Access denied</p>;
   }
@@ -38,17 +43,17 @@ const ordersActive = searchParams.get("orders") === "ok";
                  </div>
 
                 <div className=" flex flex-col  " >
-                     <Link href="/admin-dashboard/?food-menu=ok" className="  px-[20px] py-[5px] bg-gray-100 rounded-lg " > 
+                     <Link href="/admin-dashboard?food-menu=ok" className="  px-[20px] py-[5px] bg-gray-100 rounded-lg " > 
                            food menu
                      </Link>
-                     <Link href="/admin-dashboard/?orders=ok" > 
+                     <Link href="/admin-dashboard?orders=ok" > 
                            orders
                      </Link>
                 </div>
             </div>
 
             <div className=" bg-amber-100 w-[80%] " >
-               { foodMenuActive && <FoodMenu/> }
+                { foodMenuActive && <FoodMenu/> }
             </div>
         </div>
     )

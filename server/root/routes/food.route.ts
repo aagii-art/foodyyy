@@ -1,10 +1,10 @@
 import express from "express";
-import { createFood, getCategories, getFoodsByCategory } from "../controllers/food.controller";
+import { createFood, getCategories, getFoodsByCategory, upload } from "../controllers/food.controller";
 
 const foodRouter = express.Router();
 
-foodRouter.get("/categories", getCategories);
 foodRouter.get("/", getFoodsByCategory);
-foodRouter.post( "/", createFood );
+foodRouter.get("/categories", getCategories);
 
+foodRouter.post("/", upload.single("jurag"), createFood);
 export default foodRouter;

@@ -1,3 +1,4 @@
+
 import FoodList from "./component/food.component/food";
 
 export default function Home() {

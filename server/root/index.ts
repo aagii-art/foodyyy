@@ -12,8 +12,9 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use( "/api/foods", foodRouter )
-app.use( "/api/users", userRoute )
+app.use("/uploads", express.static("uploads"));
+app.use( "/api/foods", foodRouter );
+app.use( "/api/users", userRoute );
 app.get( "/", (q, s ) => {
     s.send(" server running ");
 }); 

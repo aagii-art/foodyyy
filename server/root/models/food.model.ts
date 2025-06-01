@@ -29,7 +29,7 @@ const foodSchema = new Schema<typeFood>(
     image: {
           type: String,
           required: true,
-    },},
+    } },
    { timestamps  : true }
 ) ;
 const Food = mongoose.model( "foody", foodSchema );
