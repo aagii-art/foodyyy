@@ -2,24 +2,59 @@ import path from "path";
 import multer from "multer";
 import Food from "../models/food.model";
 import { Request, Response } from "express";
+import CategoryModel from "../models/category.model";
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const categories = await Food.distinct("category");
+    const categories = await CategoryModel.find();
     res.json({ categories });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch categories" });
   }
 };
 
+export const addCategory = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.body;
+    console.log( " category from frontend : ", req.body );
+    
+    if (!name || name.trim() === "") {
+       res.status(400).json({ message: "Category name is required" });
+       return;
+    }
+
+    const existing = await CategoryModel.findOne({ name });
+    if (existing) {
+       res.json({ message: "Category already exists" });
+       return;
+    }
+
+    const newCategory = new CategoryModel({ name });
+    await newCategory.save();
+    console.log( " added category :", newCategory );
+    
+    res.status(201).json({ message: "Category added successfully", category: newCategory });
+  } catch (err) {
+    console.error("Add category error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getAllFoods = async (req: Request, res: Response) => {
+  try {
+    const foods = await Food.find(); 
+    res.json({ foods });
+  } catch (err) {
+    console.error("Failed to fetch all foods:", err);
+    res.status(500).json({ error: "Failed to fetch all foods" });
+  }
+};
+
 export const getFoodsByCategory = async (req: Request, res: Response) => {
   try {
     const category = req.query.category as string;
-    if (!category) {
-     res.status(400).json({ error: "Category is no selected " }); return ;
-    }
 
-    const foods = await Food.find({ category });
+    const foods = category ? await Food.find({ category }) : await Food.find() ;
     console.log(" this selected category's foods :", foods);
     
     res.json({ foods });

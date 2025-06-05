@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import axios from "axios";
 import { Formik, Form, ErrorMessage, Field } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
     onClose : () => void;
@@ -19,8 +19,24 @@ const foodSchema = Yup.object().shape({
 })  
 
 export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
-         const [message, setMessage] = useState<string | null>(null);
          const [error, setError] = useState<string | null>(null);
+         const [categories, setCategories] = useState<string[]>([]);
+         const [message, setMessage] = useState<string | null>(null);
+
+         useEffect(() => {
+              const fetchCategories = async () => {
+                try {
+                  const res = await axios.get("http://localhost:3000/api/foods/categories");
+                  const names = res.data.categories.map((cat: any) => cat.name);
+                  console.log("categories :", names);
+                  
+                  setCategories(names);
+                } catch (err) {
+                  console.error("Error fetching categories", err);
+                }
+              };
+             fetchCategories();
+         }, []);
          
     return (
         <div className=" top-[25%] right-[35%] absolute  p-4  border rounded mb-4 bg-white shadow">
@@ -48,7 +64,6 @@ export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
                           console.log("this is hariu foodForm's post huseltiin : ", res );
                           setError(null);
                           setMessage(res.data.message); 
-                          // resetForm();
                           setTimeout(() => {
                             onFoodAdded();
                           }, 5000); 
@@ -72,7 +87,12 @@ export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
          
                    <div>
                      <label className="block">Ангилал:</label>
-                     <Field name="category" className="border p-2 w-full rounded" />
+                     <Field name="category" as="select" className="border p-2 w-full rounded">
+                       <option value="">-- Сонгоно уу --</option>
+                       {categories.map((cat) => (
+                         <option key={cat} value={cat}>{cat}</option>
+                       ))}
+                     </Field>
                      <ErrorMessage name="category" component="div" className="text-red-500 text-sm" />
                    </div>
 
