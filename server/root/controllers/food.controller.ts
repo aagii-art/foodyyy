@@ -25,7 +25,7 @@ export const addCategory = async (req: Request, res: Response) => {
 
     const existing = await CategoryModel.findOne({ name });
     if (existing) {
-       res.json({ message: "Category already exists" });
+       res.status(400).json({ message: "Category already exists" });
        return;
     }
 
@@ -40,25 +40,12 @@ export const addCategory = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllFoods = async (req: Request, res: Response) => {
-  try {
-    const foods = await Food.find(); 
-    res.json({ foods });
-  } catch (err) {
-    console.error("Failed to fetch all foods:", err);
-    res.status(500).json({ error: "Failed to fetch all foods" });
-  }
-};
-
 export const getFoodsByCategory = async (req: Request, res: Response) => {
   try {
     const category = req.query.category as string;
-
     const foods = category ? await Food.find({ category }) : await Food.find() ;
-    console.log(" this selected category's foods :", foods);
-    
     res.json({ foods });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ error: "Failed to fetch foods" });
   }
 };

@@ -17,7 +17,7 @@ export default function AddCategoryForm({ onCategoryAdded, onClose }: Props) {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   return (
-    <div className="bg-white shadow p-4 rounded mb-4">
+    <div className="bg-white w-[25vw] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl right-[0%] p-4 rounded mb-4">
       <h3 className="text-lg font-semibold mb-2">Add New Category</h3>
 
       <Formik
@@ -26,13 +26,15 @@ export default function AddCategoryForm({ onCategoryAdded, onClose }: Props) {
         onSubmit={async (values, { resetForm }) => {
           try {
             const res =  await axios.post("http://localhost:3000/api/foods/categories", values);
-            setSuccessMessage(res.data.message)
+            setSuccessMessage(res.data.message);
+            setErrorMessage("");
             resetForm();
-            // onCategoryAdded();
+            onCategoryAdded();
           } catch (error) {
             const axiosError = error as AxiosError<{ message: string }>;
             console.error("Error adding category:", error);
             setErrorMessage(axiosError.response?.data?.message || "Failed to add category. Please try again." ); 
+            setSuccessMessage("");
           }
         }}
       >

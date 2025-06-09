@@ -1,6 +1,6 @@
 "use client"
 import axios from "axios"
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import AllDishesButton from "./allDishesButton";
 import AddFoodForm from "../component/addFoodForm";
 import AddCategoryForm from "../component/addCategoryForm";
@@ -20,14 +20,23 @@ export default function FoodMenu () {
 
   const [showForm, setShowForm] = useState(false);
   const [foods, setFoods] = useState<FoodType [] >([]);
+  const [ numberFoods, setNumberFoods ] = useState< FoodType []>([]);
   const [categories, setCategories] = useState<Category []>([]);
   const [showCategoryForm, setShowCategoryForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [ selectedCategoryName, setSelectedCategoryName ] = useState("");
 
+  const handleoClick = ( v : string ) => {
+    console.log(v);
+    setSelectedCategoryName( v );
+    setShowForm(true);
+  }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const res = await axios.get("http://localhost:3000/api/foods/categories");
+        const numberFood = await axios.get(`http://localhost:3000/api/foods`);
+        setNumberFoods(numberFood.data.foods);
         setCategories(res.data.categories);
 
       } catch (error) {
@@ -38,58 +47,61 @@ export default function FoodMenu () {
   }, []);
   console.log( " all category : ", categories);
 
-  useEffect(() => {
-  const fetchFoods = async () => {
-    try {
-      let url = "http://localhost:3000/api/foods";
-      if (selectedCategory) {
-        url += `?category=${selectedCategory}`;
-      }
+const fetchFoods = async (category: string) => {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/foods?category=${category}`);
+    console.log("foods by selected category", res);
+    setFoods(res.data.foods);
+  } catch (error) {
+    console.error("Error fetching foods", error);
+  }
+};
 
-      const res = await axios.get(url);
-      setFoods(res.data.foods);
-    } catch (error) {
-      console.error("Error fetching foods");
-    }
-  };
-  fetchFoods();
+useEffect(() => {
+
+  if (selectedCategory) {
+    fetchFoods(selectedCategory);
+  }
 }, [selectedCategory]);
 
-
-  // useEffect(() => {
-  //   console.log( " category by selected : ", selectedCategory);
-    
-  //   if (selectedCategory) {
-  //     const fetchFoods = async () => {
-  //       try {
-  //         const res = await axios.get(`http://localhost:3000/api/foods?category=${selectedCategory}`);
-  //         console.log( " foods by selected category ", res  );
-          
-  //         setFoods(res.data.foods);
-  //       } catch (error) {
-  //         console.error("Error fetching foods");
-  //       }
-  //     };
-  //     fetchFoods();
-  //   }
-  // }, [selectedCategory]);
-
   return (
-    <div className="p-4">
-        <div className="mb-6">
-            <button
-              onClick={() => setShowCategoryForm(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded"
-            >
-              + Add Category
-            </button>
-            {
-              <AllDishesButton 
-                selectedCategory={selectedCategory}
-                onClick={ () => { setSelectedCategory("") } }
-               />
-            }
-            {showCategoryForm && (
+    <div className=" bg-gray-200 p-[20px] flex flex-col  ">
+
+      <div className="bg-white p-[20px] " >
+          <h2 className="text-xl font-bold mb-4"> Dishes Categories </h2>
+          <div className="flex flex-wrap gap-4 mb-6">
+                <button 
+                    onClick={ () => { setSelectedCategory("") } }
+                    className={`rounded-full py-[10px] px-4 border ${ !selectedCategory ? " border-red-500 " : " border-[#E4E4E7] " } `}
+                >
+                  All dishes <span className=" px-[10px] rounded-full py-[5px] bg-[#18181B] text-white " > {numberFoods.length } </span> 
+
+                </button>
+    
+                { categories && categories.map((cat) => {
+                  const foodsForCategory = numberFoods.filter(food => food.category === cat.name );
+    
+                  return (
+                  <button
+                    key={cat.name}
+                    onClick={() => setSelectedCategory(cat.name)}
+                    className={`px-4 py-[10px] rounded-full border  ${selectedCategory === cat.name ? " border-red-500 " : " border-[#E4E4E7] "}`}
+                  >
+                    {cat.name} <span className=" px-[10px] rounded-full py-[5px] bg-[#18181B] text-white " > { foodsForCategory.length } </span> 
+                  </button> )
+                })}
+    
+                <button
+                  onClick={() => setShowCategoryForm(true)}
+                  className="w-[40px] h-[40px] rounded-full bg-[#EF4444] text-white px-4 py-2 "
+                >
+                  + 
+                </button>
+    
+          </div>
+      </div>
+      
+     {showCategoryForm && (
               <AddCategoryForm
                 onCategoryAdded={() => {
                   setShowCategoryForm(false);
@@ -98,48 +110,47 @@ export default function FoodMenu () {
                     .catch(err => console.error("Reload category error", err));
                 }}
                 onClose={() => setShowCategoryForm(false)}
+                
               />
-            )}
-        </div>
+      )}
 
-      <div>
-          <h2 className="text-xl font-bold mb-4">Food Categories</h2>
-          <div className="flex gap-4 mb-6">
-            { categories && categories.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => setSelectedCategory(cat.name)}
-                className={`px-4 py-2 rounded ${selectedCategory === cat.name ? "bg-blue-600 text-white" : "bg-gray-200"}`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-      </div>
-      
       { showForm && (
         <AddFoodForm
-            onFoodAdded={() => { setShowForm(false) }}
+            selectedCategory={selectedCategory}
+            selectedCategoryName={selectedCategoryName}
+            onFoodAdded={() => { setShowForm(false), fetchFoods( selectedCategory ); }}
             onClose={() => setShowForm(false)}
         />
       )}
 
-      <div className="">
+      { !selectedCategory &&
+              <AllDishesButton 
+                selectedCategory={selectedCategory}
+                oClick={handleoClick}
+               />
+      }
+      { selectedCategory && 
+        <h2 className=" font-semibold text-[20px] " > { selectedCategory } </h2>
+      }
+      { selectedCategory &&
+        <div className="p-[20px] gap-[10px] bg-green-200 grid grid-cols-4 ">
               <button
                    onClick={() => setShowForm(true)}
-                   className="bg-green-600 text-white px-4 py-2 rounded"
+                   className=" px-4 py-2 border border-dashed border-red-500 rounded-lg"
               >
-                   + Add Food
+                 <p> Add new Dish to </p>
+                 <p> { selectedCategory } </p>    
               </button>
 
             { foods.map((food) => (
-              <div key={food._id} className="border p-4 rounded shadow-sm">
-                <img src={`http://localhost:3000/${food.image}`} alt={food.name} className="w-full h-40 object-cover mb-2 rounded"/>
+              <div key={food._id} className="border border-[#E4E4E7] rounded-lg">
+                <img src={`http://localhost:3000/${food.image}`} alt={food.name} className="w-full min-h-screen-[50%] object-cover mb-2 rounded"/>
                 <h3 className="font-bold text-lg">{food.category}</h3>
                 <p>₮ {food.price}</p>
               </div>
             ))}
-      </div>
+        </div>
+      }
 
     </div>
   );

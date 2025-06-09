@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 interface Props {
     onClose : () => void;
     onFoodAdded : () => void;
+    selectedCategory  : string;
+    selectedCategoryName : string;
   }
 
 const foodSchema = Yup.object().shape({
     name : Yup.string().required(" ner oruul "),
-    category: Yup.string().required("Ангилал шаардлагатай"),
     price: Yup.number().typeError("Тоон утга оруулна уу").required("Үнэ оруулна уу"),
     image: Yup.mixed().required("Зураг оруулна уу")
           .test("fileType", "Зөвхөн зураг файл байж болно", (value ) => {
@@ -18,7 +19,7 @@ const foodSchema = Yup.object().shape({
     description : Yup.string().required(" tailbar oruul zaluu ")
 })  
 
-export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
+export default function AddFoodForm({ onFoodAdded, onClose, selectedCategory, selectedCategoryName }: Props ) {
          const [error, setError] = useState<string | null>(null);
          const [categories, setCategories] = useState<string[]>([]);
          const [message, setMessage] = useState<string | null>(null);
@@ -39,17 +40,17 @@ export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
          }, []);
          
     return (
-        <div className=" top-[25%] right-[35%] absolute  p-4  border rounded mb-4 bg-white shadow">
-            <h2 className="text-lg font-semibold mb-4">Хоол нэмэх</h2>
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2  p-4  border rounded mb-4 bg-white shadow">
+            <h2 className="text-lg font-semibold mb-4">Хоол нэмэх : { selectedCategory ? selectedCategory : selectedCategoryName }  </h2>
             <Formik
-                  initialValues={{ name: "", category: "", price : "" , image : null as File | null,  description: "" }}
+                  initialValues={{ name: "", price : "" , image : null as File | null,  description: "" }}
                   validationSchema={foodSchema}
                   onSubmit={async (values , { resetForm }) => {
                           
                           const formData = new FormData();
                           formData.append("name", values.name);
                           formData.append("price", values.price.toString());
-                          formData.append("category", values.category);
+                          formData.append("category", selectedCategory ? selectedCategory : selectedCategoryName );
                           if (values.image) {
                              formData.append("jurag", values.image); 
                           }
@@ -64,9 +65,10 @@ export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
                           console.log("this is hariu foodForm's post huseltiin : ", res );
                           setError(null);
                           setMessage(res.data.message); 
+                          resetForm();
                           setTimeout(() => {
                             onFoodAdded();
-                          }, 5000); 
+                          }, 3000); 
                        } catch (error : any ) {
                           setMessage(null);
                           if (error.response && error.response.data.message) {
@@ -85,17 +87,6 @@ export default function AddFoodForm({ onFoodAdded, onClose }: Props ) {
                      <ErrorMessage name="name" component="div" className="text-red-500 text-sm" />
                    </div>
          
-                   <div>
-                     <label className="block">Ангилал:</label>
-                     <Field name="category" as="select" className="border p-2 w-full rounded">
-                       <option value="">-- Сонгоно уу --</option>
-                       {categories.map((cat) => (
-                         <option key={cat} value={cat}>{cat}</option>
-                       ))}
-                     </Field>
-                     <ErrorMessage name="category" component="div" className="text-red-500 text-sm" />
-                   </div>
-
                    <div>
                      <label className="block">Тайлбар:</label>
                      <Field

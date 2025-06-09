@@ -32,9 +32,9 @@ export default function Admin () {
   }
 
     return (
-        <div className="flex bg-blue-300 min-h-screen " >
-            <div className=" flex flex-col  items-center flex-1 " >
-                 <div className=" flex gap-[10px] bg-amber-100 " >
+        <div className="flex min-h-[100vh]  " >
+            <div className=" sticky top-[0%] h-[100vh] flex flex-col  items-center w-[20vw] " >
+                 <div className=" flex gap-[10px] " >
                       <img src="/kask.png" alt="" className=" w-[36px] h-[36px] " />
                       <div>
                            <p className=" text-[20px] font-semibold   " >Nom<span className=" " >Nom</span> </p>
@@ -42,17 +42,19 @@ export default function Admin () {
                       </div>
                  </div>
 
-                <div className=" flex flex-col  " >
-                     <Link href="/admin-dashboard?food-menu=ok" className="  px-[20px] py-[5px] bg-gray-100 rounded-lg " > 
+                <div className=" flex flex-col gap-[20px] mt-[30px] " >
+                     <Link href="/admin-dashboard?food-menu=ok" className={`  px-[20px] py-[5px]  rounded-full " ${ foodMenuActive ? " bg-[#18181B] text-white " : "" }  `} >
                            food menu
                      </Link>
-                     <Link href="/admin-dashboard?orders=ok" > 
+                     <Link href="/admin-dashboard?orders=ok" 
+                         className={`  px-[20px] py-[5px] rounded-full ${ ordersActive ? " bg-[#18181B] text-white " : "" } `}
+                     > 
                            orders
                      </Link>
                 </div>
             </div>
 
-            <div className=" bg-amber-100 w-[80%] " >
+            <div className=" bg-amber-100 w-[80vw] " >
                 { foodMenuActive && <FoodMenu/> }
             </div>
         </div>
