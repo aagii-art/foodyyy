@@ -95,3 +95,35 @@ export const createFood = async (req: Request, res: Response) => {
     }
 }
 
+export const updateFood = async (req: Request, res: Response) => {
+  try {
+    console.log(req.body);
+    
+    const foodId = req.params.id;
+    const { name, description, price, category } = req.body;
+    const imagePath = req.file?.path;
+
+    const updateData: any = {};
+
+    if (name) updateData.name = name;
+    if (description) updateData.description = description;
+    if (price) updateData.price = price;
+    if (category) updateData.category = category;
+    if (imagePath) updateData.image = imagePath;
+
+    const updatedFood = await Food.findByIdAndUpdate(
+      foodId,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedFood) {
+       res.status(404).json({ message: "Food not found" });
+       return;
+    }
+
+    res.status(200).json({ message: "Food updated successfully", food: updatedFood });
+  } catch (error) {
+    res.status(500).json({ message: "Server error during food update" });
+  }
+};

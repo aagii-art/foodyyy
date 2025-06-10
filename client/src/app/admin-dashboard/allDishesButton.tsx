@@ -1,6 +1,7 @@
 "use client";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import EditDishForm from "./editDishForm";
 
 interface AllDishesButtonProps {
   selectedCategory: string;
@@ -23,8 +24,9 @@ export default function AllDishesButton({ selectedCategory, oClick,}: AllDishesB
 
 const [showForm, setShowForm] = useState(false);
 const [foods, setFoods] = useState<FoodType [] >([]);
-const [categories, setCategories] = useState<Category []>([]);
-    
+const [categories, setCategories] = useState<Category []>([]); 
+const [editingFood, setEditingFood] = useState<FoodType | null>(null);
+
   useEffect(() => {
   const fetchData = async () => {
     try {
@@ -39,7 +41,6 @@ const [categories, setCategories] = useState<Category []>([]);
       console.error("Fetch all data error", error);
     }
   };
-
   fetchData();
  }, [selectedCategory]);
 
@@ -51,6 +52,9 @@ const [categories, setCategories] = useState<Category []>([]);
               
               return (
                 <div key={cat._id} className="bg-white p-[20px] my-[20px]">
+                 { editingFood &&
+                    <EditDishForm food={editingFood} />
+                 } 
                   <h2 className="text-xl font-bold mb-2">{cat.name} ({ foodsForCategory.length }) </h2>
                   <div className=" gap-[20px] grid grid-cols-4 ">
                     <div
@@ -61,13 +65,19 @@ const [categories, setCategories] = useState<Category []>([]);
                          <p>  { cat.name } </p> 
                     </div>
                     {foodsForCategory.map((food) => (
-                      <div key={food._id} className="border border-[#E4E4E7] p-[10px] rounded-lg shadow-sm">
+                      <div key={food._id} className="relative  border border-[#E4E4E7] p-[10px] rounded-lg shadow-sm">
                         <img src={`http://localhost:3000/${food.image}`} alt={food.name} className="w-full h-40 object-cover mb-2 rounded"/>
                         <div className=" flex justify-between " >
                             <h3 className="font-semibold text-[#EF4444] text-[14px]">{food.name}</h3>
                             <p>$ {food.price}</p>
                         </div>
                         <p className="  " > { food.description } </p>
+                        <button 
+                            onClick={ () =>  setEditingFood(food) }
+                            className="absolute top-[50%] flex justify-center items-center right-[5%] w-[44px] h-[44px] rounded-full bg-white "
+                         >
+                          <img src="edit.png" alt=""  />
+                        </button>
                       </div>
                     ))}
                   </div>
